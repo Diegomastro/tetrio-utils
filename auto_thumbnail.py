@@ -6,31 +6,37 @@ import requests
 import argparse
 from PIL import Image, ImageFont, ImageDraw
 
-##### API CALLS
-username_left, username_right = sys.argv[1:]
-if len(sys.argv) != 3:
-    raise ValueError(f"Usage: {sys.argv[0]} username1 username2")
+if str.upper(sys.argv[1]) == "DEBUG": # modo debug para no andar llamando a la api
+    names = ["MASTRITO", "JUANMA78"]
+    ratings = ["23923 TR", "23751 TR"]
+    ranks = [Image.open("res/x.png"), Image.open("res/d+.png")]
+    images = [Image.open("res/unknown.png"), Image.open("res/unknown.png")]
+else:
+    ##### API CALLS
+    username_left, username_right = sys.argv[1:]
+    if len(sys.argv) != 3:
+        raise ValueError(f"Usage: {sys.argv[0]} username1 username2")
 
-names = []
-ratings = []
-ranks = []
-images = []
-for username in sys.argv[1:]:
+    names = []
+    ratings = []
+    ranks = []
+    images = []
+    for username in sys.argv[1:]:
 
-    response = requests.get(f"https://ch.tetr.io/api/users/{username}")
-    player = response.json()["data"]["user"]
-    names.append(str.upper(player["username"]))
-    ratings.append(f'{player["league"]["rating"]:.0f} TR')
-    rank = player["league"]["rank"]
-    ranks.append(Image.open(f"res/{rank}.png"))
+        response = requests.get(f"https://ch.tetr.io/api/users/{username}")
+        player = response.json()["data"]["user"]
+        names.append(str.upper(player["username"]))
+        ratings.append(f'{player["league"]["rating"]:.0f} TR')
+        rank = player["league"]["rank"]
+        ranks.append(Image.open(f"res/{rank}.png"))
 
-    response = requests.get(f" https://tetr.io/user-content/avatars/{player['_id']}.jpg")
-    with open(f"auto_thumbnail/temp.jpg", "wb") as f:
-        f.write(response.content)
-    try:
-        images.append(Image.open("auto_thumbnail/temp.jpg"))
-    except PIL.UnidentifiedImageError:
-        images.append(Image.open("res/unknown.png"))
+        response = requests.get(f" https://tetr.io/user-content/avatars/{player['_id']}.jpg")
+        with open(f"auto_thumbnail/temp.jpg", "wb") as f:
+            f.write(response.content)
+        try:
+            images.append(Image.open("auto_thumbnail/temp.jpg"))
+        except PIL.UnidentifiedImageError:
+            images.append(Image.open("res/unknown.png"))
 
 ##### PIL
 background = Image.open("res/background.jpg")
