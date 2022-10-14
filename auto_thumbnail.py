@@ -21,7 +21,8 @@ for username in sys.argv[1:]:
     player = response.json()["data"]["user"]
     names.append(str.upper(player["username"]))
     ratings.append(f'{player["league"]["rating"]:.0f} TR')
-    ranks.append(player["league"]["rank"])
+    rank = player["league"]["rank"]
+    ranks.append(Image.open(f"res/{rank}.png"))
 
     response = requests.get(f" https://tetr.io/user-content/avatars/{player['_id']}.jpg")
     with open(f"auto_thumbnail/temp.jpg", "wb") as f:
@@ -29,11 +30,11 @@ for username in sys.argv[1:]:
     try:
         images.append(Image.open("auto_thumbnail/temp.jpg"))
     except PIL.UnidentifiedImageError:
-        images.append(Image.open("auto_thumbnail/unknown.png"))
+        images.append(Image.open("res/unknown.png"))
 
 ##### PIL
-background = Image.open("auto_thumbnail/background.jpg")
-vs = Image.open("auto_thumbnail/vs.png")
+background = Image.open("res/background.jpg")
+vs = Image.open("res/vs.png")
 background.thumbnail((1280, 720))
 
 bg_w, bg_h = background.size
@@ -52,6 +53,9 @@ right_offset = int(4.5 * bg_w // 6)
 imag_height = 2 * bg_h // 8
 name_height = 5.5 * bg_h // 8
 rating_height = 6.5 * bg_h // 8
+
+coord_rank_left = 100, 100
+coord_rank_right = 900, 100
 ###########################################################
 
 coord_imag_left = left_offset - left_w // 2, imag_height
@@ -66,6 +70,8 @@ coord_vs = bg_w // 2 - vs_w // 2, bg_h // 2 - vs_h // 2
 # magic
 background.paste(images[0], coord_imag_left)
 background.paste(images[1], coord_imag_right)
+background.paste(ranks[0], coord_rank_left, ranks[0])
+background.paste(ranks[1], coord_rank_right, ranks[1])
 background.paste(vs, coord_vs, vs)
 
 draw.text(coord_name_left, names[0], color, font=font, anchor="ma")
